@@ -15,14 +15,17 @@ This demo mimicks a simplified course booking application composed of
 `quarkus-lra-course` contains an embedded LRA coordinator (`http://localhost:8080/lra-coordinator`).
 
 {empty}::
-Every microservice can by started by running `mvn quarkus:dev`
+Every microservice can by started by running
+
+* `./quarkus-dev.sh` as Quarkus application in development mode,
+* `./wildfly-dev.sh` as JEE application on WildFly (bootable JAR) in development mode.
 
 Demo data::
 
 * Three rooms in Berlin (location `"B"`) and two rooms in Bielefeld (`"BI"`) 
 with different seat capacities.
-* Three trainers capable of holding some or all of the courses `"JSE"` (Java SE), 
-`"JEE"` (Jakarta EE) and `"K8s"` (Kubernetes).
+* Three trainers capable of holding some or all of the courses  
+`"JEE"` (Jakarta EE), `"K8s"` (Kubernetes) and `"SBT"` (Spring Boot).
 
 Demo scenarios::
 There are the following demos, each represented by a REST call in `quarkus-lra-course`.
