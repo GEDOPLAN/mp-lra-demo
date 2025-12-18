@@ -1,4 +1,9 @@
 /subsystem=logging/root-logger=ROOT:remove-handler(name=FILE)
 /subsystem=logging/console-handler=CONSOLE:write-attribute(name=level, value=ALL)
+/subsystem=logging/console-handler=CONSOLE:undefine-attribute(name=named-formatter)
+/subsystem=logging/console-handler=CONSOLE:write-attribute(name=formatter, value="%s%e%n")
 /subsystem=logging/periodic-rotating-file-handler=FILE:remove
-/subsystem=logging/logger=de.gedoplan.seminar:add(level=DEBUG)
+/subsystem=logging/root-logger=ROOT:write-attribute(name=level, value=WARN)
+/subsystem=logging/logger=io:add(level=ERROR)
+/subsystem=logging/logger=org:add(level=ERROR)
+/subsystem=logging/logger=de.gedoplan.showcase:add(level=DEBUG)

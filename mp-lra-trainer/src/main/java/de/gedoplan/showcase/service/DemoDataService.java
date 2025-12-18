@@ -5,10 +5,10 @@ import de.gedoplan.showcase.persistence.TrainerRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.Startup;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
-import io.quarkus.runtime.StartupEvent;
 
 @ApplicationScoped
 public class DemoDataService {
@@ -17,7 +17,7 @@ public class DemoDataService {
   TrainerRepository trainerRepository;
 
   @Transactional
-  void initDemoData(@Observes StartupEvent startupEvent) {
+  void initDemoData(@Observes Startup startupEvent) {
     if (this.trainerRepository.countAll() == 0) {
       this.trainerRepository.persist(new Trainer("dw", "Dirk Weil", "JSE", "JEE", "K8s"));
       this.trainerRepository.persist(new Trainer("mp", "Markus Pauer", "JSE", "JEE"));

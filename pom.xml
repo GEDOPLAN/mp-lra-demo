@@ -69,6 +69,16 @@
     </repository>
   </repositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>de.gedoplan</groupId>
+        <artifactId>baselibs-utils</artifactId>
+        <version>10.3</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -193,6 +203,7 @@
       </activation>
 
       <dependencyManagement>
+
         <!-- Attention: Keep Narayana AFTER Quarkus BOM -->
         <dependencies>
           <dependency>

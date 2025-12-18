@@ -24,6 +24,10 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>de.gedoplan</groupId>
+      <artifactId>baselibs-utils</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -127,6 +131,12 @@
               In order to replace the parent layers configuration completely, 
               use <layers combine.self="override">...</layers>.
               -->
+              <layers>
+                <layer>microprofile-lra-coordinator</layer>
+                <layer>microprofile-lra-participant</layer>
+                <layer>microprofile-platform</layer>
+                <layer>microprofile-rest-client</layer>
+              </layers>
               <cli-sessions>
                 <cli-session>
                   <script-files>
@@ -134,8 +144,10 @@
                   </script-files>
                 </cli-session>
               </cli-sessions>
+              <debug>true</debug>
+              <debugPort>8787</debugPort>
               <jvmArguments>
-                <arg>-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n</arg>
+                <arg>-Djboss.bind.address=0.0.0.0</arg>
               </jvmArguments>
             </configuration>
           </plugin>

@@ -5,9 +5,9 @@ import de.gedoplan.showcase.persistence.RoomRepository;
 
 import org.jboss.logging.Logger;
 
-import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.Startup;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
@@ -21,7 +21,7 @@ public class DemoDataService {
   Logger logger;
 
   @Transactional
-  void initDemoData(@Observes StartupEvent startupEvent) {
+  void initDemoData(@Observes Startup startupEvent) {
     if (this.roomRepository.countAll() == 0) {
       this.roomRepository.persist(new Room("WB", "Willy Brandt", "B", 6));
       this.roomRepository.persist(new Room("RVW", "Richard von Weizsäcker", "B", 12));
