@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.gedoplan</groupId>
+    <artifactId>build-master</artifactId>
+    <version>2025.11.1</version>
+    <relativePath />
+  </parent>
+
+  <groupId>de.gedoplan.showcase</groupId>
+  <artifactId>mp-lra-demo</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>mp-lra-course</module>
+    <module>mp-lra-room</module>
+    <module>mp-lra-trainer</module>
+  </modules>
+
+  <properties>
+    <java.code.version>21</java.code.version>
+
+    <!-- jakarta.platform:jakarta.jakartaee-api -->
+    <jakartaee-api.version>10.0.0</jakartaee-api.version>
+
+    <!-- org.jboss.logging:jboss-logging -->
+    <jboss-logging.version>3.6.1.Final</jboss-logging.version>
+
+    <!-- org.projectlombok:lombok -->
+    <lombok.version>1.18.42</lombok.version>
+
+    <liberty.version>25.0.0.10</liberty.version>
+    <liberty.runtime.groupId>io.openliberty</liberty.runtime.groupId>
+    <!-- <liberty.runtime.groupId>io.openliberty.beta</liberty.runtime.groupId> -->
+    <liberty.runtime.artifactId>openliberty-runtime</liberty.runtime.artifactId>
+    <liberty.runtime.version>${liberty.version}</liberty.runtime.version>
+    <liberty.maven.plugin.version>3.11.5</liberty.maven.plugin.version>
+
+    <!-- org.eclipse.microprofile:microprofile:pom -->
+    <microprofile.version>7.0</microprofile.version>
+    <!-- org.eclipse.microprofile.lra:microprofile-lra-api -->
+    <microprofile-lra.version>2.0.1</microprofile-lra.version>
+
+    <narayana.version>7.0.2.Final</narayana.version>
+
+    <quarkus.version>3.29.4</quarkus.version>
+
+    <wildfly.jar.plugin.version>12.0.0.Final</wildfly.jar.plugin.version>
+    <wildfly.feature-pack>wildfly</wildfly.feature-pack>
+    <!-- <wildfly.feature-pack>wildfly-preview</wildfly.feature-pack> -->
+    <wildfly.version>38.0.1.Final</wildfly.version>
+
+    <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+    <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+    <quarkus.platform.version>${quarkus.version}</quarkus.platform.version>
+
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>gedoplanPublic</id>
+      <url>https://maven.gedoplan.de/repository/maven-public</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.42</version>
+      <scope>provided</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <defaultGoal>package</defaultGoal>
+    <finalName>${project.artifactId}</finalName>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>io.openliberty.tools</groupId>
+          <artifactId>liberty-maven-plugin</artifactId>
+          <version>${liberty.maven.plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.wildfly.plugins</groupId>
+          <artifactId>wildfly-jar-maven-plugin</artifactId>
+          <version>${wildfly.jar.plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <annotationProcessorPath>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </annotationProcessorPath>
+            <annotationProcessorPath>
+              <groupId>${jpamodelgen.groupId}</groupId>
+              <artifactId>${jpamodelgen.artifactId}</artifactId>
+              <version>${jpamodelgen.version}</version>
+            </annotationProcessorPath>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+    </plugins>
+
+  </build>
+
+  <profiles>
+    <!-- Profile for JEE servers. -->
+
+    <profile>
+      <id>jee_standard</id>
+
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.openliberty.tools</groupId>
+            <artifactId>liberty-maven-plugin</artifactId>
+            <configuration>
+              <serverName>${project.artifactId}_liberty</serverName>
+              <copyDependencies>
+                <location>${project.build.directory}/liberty/wlp/usr/shared/resources</location>
+                <dependency>
+                  <groupId>com.h2database</groupId>
+                  <artifactId>h2</artifactId>
+                  <version>${h2.version}</version>
+                </dependency>
+              </copyDependencies>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-jar-maven-plugin</artifactId>
+            <configuration>
+              <skip>${wildfly.jar.plugin.skip}</skip>
+              <feature-pack-location>
+                ${wildfly.feature-pack}@maven(org.jboss.universe:community-universe)#${wildfly.version}</feature-pack-location>
+              <layers combine.children="append">
+                <layer>cloud-server</layer>
+                <layer>h2-default-datasource</layer>
+              </layers>
+              <excluded-layers>
+                <layer>deployment-scanner</layer>
+              </excluded-layers>
+              <plugin-options>
+                <ignore-not-excluded-layers>true</ignore-not-excluded-layers>
+                <jboss-maven-dist />
+              </plugin-options>
+              <hollow-jar>true</hollow-jar>
+              <output-file-name>wildfly-bootable.jar</output-file-name>
+              <jvmArguments>
+                <arg>-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n</arg>
+              </jvmArguments>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- 
+    Profile for Quarkus. 
+    Enabled by existence of file jee_quarkus.
+    Disables standard JEE profile. 
+    -->
+    <profile>
+      <id>jee_quarkus</id>
+
+      <activation>
+        <file>
+          <exists>${basedir}/jee_quarkus</exists>
+        </file>
+      </activation>
+
+      <dependencyManagement>
+        <!-- Attention: Keep Narayana AFTER Quarkus BOM -->
+        <dependencies>
+          <dependency>
+            <groupId>${quarkus.platform.group-id}</groupId>
+            <artifactId>${quarkus.platform.artifact-id}</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+          <dependency>
+            <groupId>org.jboss.narayana</groupId>
+            <artifactId>narayana-bom</artifactId>
+            <version>${narayana.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+
+      <build>
+        <plugins>
+          <!-- Build executable JAR -->
+          <plugin>
+            <groupId>${quarkus.platform.group-id}</groupId>
+            <artifactId>quarkus-maven-plugin</artifactId>
+            <version>${quarkus.platform.version}</version>
+            <extensions>true</extensions>
+            <configuration>
+              <systemProperties>
+                <!--
+                This system property is necessary only because we are switching the maven packaging type
+                from war (default) to jar in projects using this profile.
+                See https://github.com/quarkusio/quarkus/issues/9727
+                -->
+                <quarkus.bootstrap.effective-model-builder>true</quarkus.bootstrap.effective-model-builder>
+              </systemProperties>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>build</goal>
+                  <goal>generate-code</goal>
+                  <goal>generate-code-tests</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- Set log manager for tests -->
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <systemPropertyVariables>
+                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                <maven.home>${maven.home}</maven.home>
+                <maven.repo>${settings.localRepository}</maven.repo>
+                <!--
+                This system property is necessary only because we are switching the maven packaging type
+                from war (default) to jar in projects using this profile.
+                See https://github.com/quarkusio/quarkus/issues/9727
+                -->
+                <quarkus.bootstrap.effective-model-builder>true</quarkus.bootstrap.effective-model-builder>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+          <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <systemPropertyVariables>
+                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                <maven.home>${maven.home}</maven.home>
+                <maven.repo>${settings.localRepository}</maven.repo>
+                <!--
+                This system property is necessary only because we are switching the maven packaging type
+                from war (default) to jar in projects using this profile.
+                See https://github.com/quarkusio/quarkus/issues/9727
+                -->
+                <quarkus.bootstrap.effective-model-builder>true</quarkus.bootstrap.effective-model-builder>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

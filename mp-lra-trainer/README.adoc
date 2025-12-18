@@ -1,0 +1,95 @@
+= Demo project for the talk "Pimp your Jakarta EE application"
+
+Starting point::
++
+This project builds a small JEE application composed of a REST api, some (CDI) injected services and a JPA based persistence layer.
++
+You can build the application with
++
+[source, shell]
+----
+mvn package
+----
++
+and deploy it in some Java EE 8 application server, e. g. WildFly 26.
++
+The server must offer a datasource with `jdbc/showcase` as JNDI name. You may use the WildFly CLI script `src/main/wildfly/showcase-ds.cli` for adding a matching datasource to your server configuration, but you have to install a driver module for PostgreSQL first (see server documentation).
++
+For demo purposes there is a compose file in `src/main/docker-compose/postgres` for starting a PostgreSQL server at `localhost:5432`.
++
+The small REST api includes an endpoint for retrieving all `Person` objects from the database:
++
+[source, shell]
+----
+curl localhost:8080/api/persons
+----
++
+The db will be populated with a few test entries upon the first request.
+
+'''
+
+Migrate from Java EE 8 to Jakarta EE 10::
++
+For upgrading the application from JEE 8 to JEE 10, the `pom.xml` includes a configuration of the OpenRewrite plugin. For clarity in this demo it has been placed into a Maven profile. Run it by
++
+[source, shell]
+----
+mvn -PtoJakarta rewrite:run
+----
++
+You have to adjust `pom.xml` afterwards - please see the comment on top of the profile definition.
++
+You may now deploy the application in an Jakarta EE 10 server, e. g. WildFly 27.
+
+'''
+
+Use WildFly as "Jar" Server Runtime::
++
+WildFly can be provisioned as bootable jar by means of the WildFly JAR Maven Plugin. For clarity in this demo it has been placed into a Maven profile. Use
++
+[source, shell]
+----
+mvn -Pwildfly package
+----
++
+to download, customize and preconfigure a WildFly server into `target/wildfly-bootable.jar` consisting of layers for REST, CDI, JPA and H2 as default datasource. The combined application and server can be started with
++
+[source, shell]
+----
+java -jar target/wildfly-bootable.jar --deployment=target/pimp-jee.war
+----
++
+This is using a hollow jar, i. e. the server jar contains just the server part and not the deployment. You can build a fat jar containing both by configuring the plugin with `<hollow-jar>false</hollow-jar>`.
++
+The plugin offers a development mode with hot reloading changes:
++
+[source, shell]
+----
+mvn -Pwildfly wildfly-jar:dev-watch
+----
+
+'''
+
+Use Quarkus as "Micro" Server Runtime::
++
+Standard JEE sources can be used with Quarkus to build an optimized server application. For clarity in this demo it has been placed into a Maven profile. Use
++
+[source, shell]
+----
+mvn -Pquarkus package
+----
++
+to build and package the application as jar file with dependencies in `target/quarkus-app`. The application can be started with
++
+[source, shell]
+----
+java -jar target/quarkus-app/quarkus-run.jar
+----
++
+The plugin offers a development mode with hot reloading changes:
++
+[source, shell]
+----
+mvn -Pquarkus quarkus:dev
+----
+

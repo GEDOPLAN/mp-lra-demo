@@ -1,0 +1,70 @@
+= mp-lra-demo
+
+*Demo for MicroProfile LRA with Quarkus*
+
+Overview::
+LRA is an implementation of the Saga Pattern for ensuring data consistency for Long 
+Running Actions in distributed applications (aka Microservices).
++
+This demo mimicks a simplified course booking application composed of
+
+* `quarkus-lra-room` using port `8180`: a microservice for booking (seminar) rooms,
+* `quarkus-lra-trainer` using port `8280`: a microservice for booking a trainer for the course,
+* `quarkus-lra-course` usng port `8080`: a microservice using both above.
+
+`quarkus-lra-course` contains an embedded LRA coordinator (`http://localhost:8080/lra-coordinator`).
+
+{empty}::
+Every microservice can by started by running `mvn quarkus:dev`
+
+Demo data::
+
+* Three rooms in Berlin (location `"B"`) and two rooms in Bielefeld (`"BI"`) 
+with different seat capacities.
+* Three trainers capable of holding some or all of the courses `"JSE"` (Java SE), 
+`"JEE"` (Jakarta EE) and `"K8s"` (Kubernetes).
+
+Demo scenarios::
+There are the following demos, each represented by a REST call in `quarkus-lra-course`.
+The goal is to show, that the bookings made are consistent (room and trainer are booked 
+or none of them) even after a failure with one of the booking steps or after cancellation.
++
+The services log their actions in conjunction with an LRA.
+Additionally `quarkus-lra-room` and `quarkus-lra-trainer` write the currently
+used rooms and trainers into their logs after every action processed.
+
+. Single-step booking
++
+Here room and trainer are booked in one step, namely by calling the REST endpoint 
+`course/book` (see `CourseBookingResource#bookCourse`). Query parameters are used
+for specifying course, date, location and number of participants.
++
+Let's try to book 3 courses with overlapping dates in Berlin:
+
+** Run `bookJeeCourse.sh`
+*** books a 4-day `Jakarta EE` course in Berlin for 5 participants starting on April 14, 2026.
+*** should complete without errors
+
+** Run `bookK8sCourse.sh`
+*** books a 3-day `Kubernetes` course in Berlin for 7 participants starting on April 15, 2026.
+*** should complete without errors
+
+** Run `bookSbtCourse.sh`
+*** books a 4-day `Spring Boot` course in Berlin for 3 participants starting on April 14, 2026.
+*** should fail, because of a trainer conflict
+
+. Multi-step booking
++
+Here room ans trainer are reserved by seperate REST calls and the booking is confirmed 
+or cancelled by another REST call in the end.
++
+_This scenario is still under development_.
+
+LRA coordinator image::
+
+Instead of the embedded LRA coordinator in `mp-lra-course` the CRI image 
+`quay.io/jbosstm/lra-coordinator` can be used for production scenarios.
+Don't use it for this demo though, because we are running services on `localhost`.
+They would not be reachable for the coordinator (unless you bind the container to 
+the host network).
+
